@@ -1,0 +1,4 @@
+cutil https://github.com/mojyack/cutil.git 78136c2386d4e4d33eb77354d418512ce43d28fd
+cutil-macros https://github.com/mojyack/cutil-macros.git e3d95d06be45548f4bd5a195a6c9a54a7b24f072
+towl https://github.com/mojyack/towl.git 01e56cdbf4ca048c3d44817b5e5bd859cea8942d
+serde https://github.com/mojyack/serde.git 10399308f8a38d97f7b489b5c980c81e6fe5d860

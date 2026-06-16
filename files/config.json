@@ -1,0 +1,23 @@
+{
+    "height": 20,
+    "position": "top",
+    "font": "monospace, Font Awesome 6 Free 11",
+    "background": "#2e3440",
+    "foreground": "#e5e9f0",
+
+    "mods_left": {
+        "padding": {"size":32},
+        "workspace": {},
+    },
+    "mods_right": {
+        "padding": {"size":32},
+        "datetime": {"format": "%Y-%m-%d %H:%M"},
+        "pipewire": {"prefix": "", "prefix_muted": ""},
+        "battery": {"name": "BAT0", "prefix": ""},
+        "temp": {"path": "/sys/class/hwmon/hwmon0/temp0_input", "prefix": ""},
+        "network": {"prefix": "", "offline": "⚠"},
+        "loadavg": {"prefix": "LA"},
+        "ram_usage": {"prefix": ""},
+        "cpu_usage": {"prefix": ""},
+    }
+}
