@@ -13,7 +13,7 @@
         "padding": {"size":32},
         "datetime": {"format": "%Y-%m-%d %H:%M"},
         "pipewire": {"prefix": "", "prefix_muted": ""},
-        "battery": {"name": "BAT0", "prefix": ""},
+        "battery": {"name": "BAT0", "prefix": "", "style": "graph"},
         "temp": {"path": "/sys/class/hwmon/hwmon0/temp0_input", "prefix": ""},
         "network": {"prefix": "", "offline": "⚠"},
         "loadavg": {"prefix": "LA"},

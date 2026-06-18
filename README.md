@@ -49,10 +49,14 @@ Reads a hwmon sysfs temperature input.
 - `prefix`(string): default `""`
 
 ## battery
-Reads `/sys/class/power_supply/<name>/`.
+Reads `/sys/class/power_supply/<name>/`. Click to cycle the display style.
 - `name`(string, required): power-supply name, e.g. `BAT0`
 - `charge`(string): sysfs metric base, `charge` or `energy` (reads `<charge>_now` / `<charge>_full`)
-- `prefix`(string): default `"BAT"`
+- `prefix`(string): drawn before the value in `simple` style. default `"BAT"`
+- `style`(string): initial display style. default `"simple"`
+  - `simple`: text style
+  - `graph`: battery icon graphic
+- `size`(number): icon height as a fraction of the bar height, `graph` style only. default `0.5`
 
 ## network
 Active default-route interface
