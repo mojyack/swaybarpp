@@ -51,7 +51,7 @@ Reads a hwmon sysfs temperature input.
 ## battery
 Reads `/sys/class/power_supply/<name>/`.
 - `name`(string, required): power-supply name, e.g. `BAT0`
-- `charge`(string, required): sysfs metric base, `charge` or `energy` (reads `<charge>_now` / `<charge>_full`)
+- `charge`(string): sysfs metric base, `charge` or `energy` (reads `<charge>_now` / `<charge>_full`)
 - `prefix`(string): default `"BAT"`
 
 ## network

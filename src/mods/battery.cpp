@@ -11,10 +11,11 @@ struct Battery : Module {
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
         unwrap(name, config.find<json::String>("name"));
-        unwrap(charge, config.find<json::String>("charge"));
+        const auto charge = config_string(config, "charge", "charge");
+
         sysfs    = std::format("/sys/class/power_supply/{}/", name.value);
-        now_file = std::format("{}_now", charge.value);
-        unwrap(full_str, read_pseudo_file((sysfs + charge.value + "_full").data()));
+        now_file = std::format("{}_now", charge);
+        unwrap(full_str, read_pseudo_file((sysfs + charge + "_full").data()));
         unwrap(full_num, from_chars<uint32_t>(full_str));
         full   = full_num;
         prefix = config_string(config, "prefix", prefix);
