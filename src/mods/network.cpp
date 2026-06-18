@@ -3,11 +3,11 @@
 
 namespace {
 struct Network : Module {
-    std::string prefix;
+    std::string format  = "{}";
     std::string offline = "!";
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
-        prefix  = config_string(config, "prefix", prefix);
+        format  = config_string(config, "format", format);
         offline = config_string(config, "offline", offline);
         return true;
     }
@@ -42,7 +42,7 @@ struct Network : Module {
 
     auto draw(RenderTarget& target, Rect& available) -> void override {
         const auto iface = active_interface();
-        const auto text  = !iface ? offline : apply_prefix(prefix, *iface);
+        const auto text  = !iface ? offline : apply_format(format, *iface);
         if(!text.empty()) {
             draw_block(target, available, text);
         }

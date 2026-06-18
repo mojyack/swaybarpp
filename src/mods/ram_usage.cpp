@@ -6,10 +6,10 @@
 
 namespace {
 struct RamUsage : Module {
-    std::string prefix = "MEM";
+    std::string format = "MEM {}";
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
-        prefix = config_string(config, "prefix", prefix);
+        format = config_string(config, "format", format);
         return true;
     }
 
@@ -27,7 +27,7 @@ struct RamUsage : Module {
         const auto total_kb = field("MemTotal:");
         const auto avail_kb = field("MemAvailable:");
         const auto used_gib = (total_kb - avail_kb) / 1024.0 / 1024.0;
-        draw_block(target, available, apply_prefix(prefix, std::format("{:.1f}G", used_gib)));
+        draw_block(target, available, apply_format(format, std::format("{:.1f}G", used_gib)));
     }
 };
 } // namespace

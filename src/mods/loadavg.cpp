@@ -4,10 +4,10 @@
 namespace {
 // the 1-minute load average from /proc/loadavg.
 struct LoadAverage : Module {
-    std::string prefix = "LA";
+    std::string format = "LA {}";
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
-        prefix = config_string(config, "prefix", prefix);
+        format = config_string(config, "format", format);
         return true;
     }
 
@@ -17,7 +17,7 @@ struct LoadAverage : Module {
         if(sscanf(content.data(), "%lf", &load) < 1) {
             return;
         }
-        draw_block(target, available, apply_prefix(prefix, std::format("{:.2f}", load)));
+        draw_block(target, available, apply_format(format, std::format("{:.2f}", load)));
     }
 };
 } // namespace

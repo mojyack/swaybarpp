@@ -1,5 +1,3 @@
-#include <format>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -43,8 +41,12 @@ auto config_string(const json::Object& config, const std::string_view key, const
     return value != nullptr ? value->value : std::string(fallback);
 }
 
-auto apply_prefix(const std::string_view prefix, const std::string_view value) -> std::string {
-    return prefix.empty() ? std::string(value) : std::format("{} {}", prefix, value);
+auto apply_format(const std::string_view format, const std::string_view value) -> std::string {
+    const auto pos = format.find("{}");
+    if(pos == std::string_view::npos) {
+        return std::string(format);
+    }
+    return std::string(format.substr(0, pos)) + std::string(value) + std::string(format.substr(pos + 2));
 }
 
 auto read_pseudo_file(const char* const path) -> std::optional<std::string> {

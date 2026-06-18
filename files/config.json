@@ -12,12 +12,12 @@
     "mods_right": {
         "padding": {"size":32},
         "datetime": {"format": "%Y-%m-%d %H:%M"},
-        "pipewire": {"prefix": "", "prefix_muted": ""},
-        "battery": {"name": "BAT0", "prefix": "", "style": "graph"},
-        "temp": {"path": "/sys/class/hwmon/hwmon0/temp0_input", "prefix": ""},
-        "network": {"prefix": "", "offline": "⚠"},
-        "loadavg": {"prefix": "LA"},
-        "ram_usage": {"prefix": ""},
-        "cpu_usage": {"prefix": ""},
+        "pipewire": {"format": " {}", "format_muted": ""},
+        "battery": {"name": "BAT0", "format": " {}", "style": "graph"},
+        "temp": {"path": "/sys/class/hwmon/hwmon0/temp0_input", "format": " {}"},
+        "network": {"format": " {}", "offline": "⚠"},
+        "loadavg": {"format": "LA {}"},
+        "ram_usage": {"format": " {}"},
+        "cpu_usage": {"format": " {}"},
     }
 }

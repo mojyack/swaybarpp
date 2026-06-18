@@ -7,20 +7,20 @@ namespace {
 struct CpuUsage : Module {
     using Clock = std::chrono::steady_clock;
 
-    std::string       prefix     = "CPU";
+    std::string       format     = "CPU {}";
     uint64_t          prev_total = 0;
     uint64_t          prev_idle  = 0;
     int               usage      = 0;
     Clock::time_point prev_sample;
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
-        prefix = config_string(config, "prefix", prefix);
+        format = config_string(config, "format", format);
         return true;
     }
 
     auto draw(RenderTarget& target, Rect& available) -> void override {
         update();
-        draw_block(target, available, apply_prefix(prefix, std::format("{}%", usage)));
+        draw_block(target, available, apply_format(format, std::format("{}%", usage)));
     }
 
     auto update() -> void {

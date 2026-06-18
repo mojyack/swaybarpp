@@ -80,7 +80,7 @@ auto draw_graph(RenderTarget& target, Rect& available, const uint32_t percent, c
 struct Battery : Module {
     std::string sysfs;
     std::string now_file;
-    std::string prefix     = "BAT";
+    std::string format     = "BAT {}";
     Style       style      = Style::Simple;
     double      graph_size = 0.5;
     uint32_t    full;
@@ -94,7 +94,7 @@ struct Battery : Module {
         unwrap(full_str, read_pseudo_file((sysfs + charge + "_full").data()));
         unwrap(full_num, from_chars<uint32_t>(full_str));
         full   = full_num;
-        prefix = config_string(config, "prefix", prefix);
+        format = config_string(config, "format", format);
         style  = config_string(config, "style", "simple") == "graph" ? Style::Graph : Style::Simple;
         if(const auto size = config.find<json::Number>("size"); size != nullptr) {
             graph_size = size->value;
@@ -117,7 +117,7 @@ struct Battery : Module {
         if(style == Style::Graph) {
             draw_graph(target, available, percent, sign, graph_size);
         } else {
-            draw_block(target, available, apply_prefix(prefix, std::format("{}{}%", percent, sign)));
+            draw_block(target, available, apply_format(format, std::format("{}{}%", percent, sign)));
         }
     }
 

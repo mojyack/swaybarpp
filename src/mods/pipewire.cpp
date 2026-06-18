@@ -16,12 +16,12 @@ constexpr auto step = 0.02;
 struct Pipewire : Module {
     VolumeControl vc;
 
-    std::string prefix       = "VOL";  // shown before the volume percentage
-    std::string prefix_muted = "MUTE"; // shown alone when the sink is muted
+    std::string format       = "VOL {}"; // {} is the volume percentage
+    std::string format_muted = "MUTE";   // shown alone when the sink is muted
 
     auto init(const int epfd, const json::Object& config) -> bool override {
-        prefix       = config_string(config, "prefix", prefix);
-        prefix_muted = config_string(config, "prefix_muted", prefix_muted);
+        format       = config_string(config, "format", format);
+        format_muted = config_string(config, "format_muted", format_muted);
 
         ensure(vc.init());
 
@@ -39,7 +39,7 @@ struct Pipewire : Module {
         if(!vc.available()) {
             return;
         }
-        const auto text = vc.muted() ? prefix_muted : apply_prefix(prefix, std::format("{}%", int(std::lround(vc.display_volume() * 100))));
+        const auto text = apply_format(vc.muted() ? format_muted : format, std::format("{}%", int(std::lround(vc.display_volume() * 100))));
         draw_block(target, available, text);
     }
 

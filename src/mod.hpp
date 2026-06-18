@@ -27,7 +27,7 @@ struct RenderTarget {
 
 auto draw_block(RenderTarget& target, Rect& available, std::string_view text) -> Rect;
 auto config_string(const json::Object& config, std::string_view key, std::string_view fallback) -> std::string;
-auto apply_prefix(const std::string_view prefix, const std::string_view value) -> std::string;
+auto apply_format(const std::string_view format, const std::string_view value) -> std::string;
 auto read_pseudo_file(const char* path) -> std::optional<std::string>;
 
 struct Module {

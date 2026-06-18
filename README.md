@@ -14,7 +14,7 @@ All optional.
 - `mods_right`(object): modules packed from the right edge (first entry rightmost)
 
 `mods_left`/`mods_right` map a module name to its config object, e.g.
-`"cpu_usage": {"prefix": "CPU"}`.
+`"cpu_usage": {"format": "CPU {}"}`.
 
 # common parameters
 Accepted by every module.
@@ -35,24 +35,24 @@ sway workspace switcher (sway IPC). Click a workspace to switch to it. Filters t
 - `format`(string): strftime format string. default `"%Y-%m-%d %H:%M"`
 
 ## cpu_usage
-- `prefix`(string): default `"CPU"`
+- `format`(string): default `"CPU {}"`
 
 ## ram_usage
-- `prefix`(string): default `"MEM"`
+- `format`(string): default `"MEM {}"`
 
 ## loadavg
-- `prefix`(string): default `"LA"`
+- `format`(string): default `"LA {}"`
 
 ## temp
 Reads a hwmon sysfs temperature input.
 - `path`(string, required): sysfs file, e.g. `/sys/class/hwmon/hwmon0/temp3_input`
-- `prefix`(string): default `""`
+- `format`(string): default `"{}"`
 
 ## battery
 Reads `/sys/class/power_supply/<name>/`. Click to cycle the display style.
 - `name`(string, required): power-supply name, e.g. `BAT0`
 - `charge`(string): sysfs metric base, `charge` or `energy` (reads `<charge>_now` / `<charge>_full`)
-- `prefix`(string): drawn before the value in `simple` style. default `"BAT"`
+- `format`(string): wraps the value in `simple` style. default `"BAT {}"`
 - `style`(string): initial display style. default `"simple"`
   - `simple`: text style
   - `graph`: battery icon graphic
@@ -60,16 +60,15 @@ Reads `/sys/class/power_supply/<name>/`. Click to cycle the display style.
 
 ## network
 Active default-route interface
-- `prefix`(string): default `""`
+- `format`(string): default `"{}"`
 - `offline`(string): shown alone when there is no default route. default `"!"`
 
 ## pipewire
 Native libpipewire. Click to mute, scroll to change volume.
-- `prefix`(string): drawn before the volume percentage. default `"VOL"`
-- `prefix_muted`(string): shown alone when muted. default `"MUTE"`
+- `format`(string): wraps the volume percentage. default `"VOL {}"`
+- `format_muted`(string): shown alone when muted. default `"MUTE"`
 
 ## file
 Reads a file and draws its contents (newlines stripped).
 - `path`(string, required): file to read
-- `prefix`(string): drawn before the contents. default `""`
-- `suffix`(string): drawn after the contents. default `""`
+- `format`(string): wraps the contents. default `"{}"`

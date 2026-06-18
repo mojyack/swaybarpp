@@ -4,21 +4,19 @@
 namespace {
 struct File : Module {
     std::string path;
-    std::string prefix;
-    std::string suffix;
+    std::string format = "{}";
 
     auto init(const int /*epfd*/, const json::Object& config) -> bool override {
         unwrap(value, config.find<json::String>("path"));
         path   = value.value;
-        prefix = config_string(config, "prefix", prefix);
-        suffix = config_string(config, "suffix", suffix);
+        format = config_string(config, "format", format);
         return true;
     }
 
     auto draw(RenderTarget& target, Rect& available) -> void override {
         unwrap_mut(content, read_pseudo_file(path.data()));
         std::erase(content, '\n');
-        draw_block(target, available, prefix + content + suffix);
+        draw_block(target, available, apply_format(format, content));
     }
 };
 } // namespace
