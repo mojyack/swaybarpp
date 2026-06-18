@@ -7,7 +7,7 @@ namespace {
 struct CpuUsage : Module {
     using Clock = std::chrono::steady_clock;
 
-    std::string       format     = "CPU {}";
+    std::string       format     = "CPU {}%";
     uint64_t          prev_total = 0;
     uint64_t          prev_idle  = 0;
     int               usage      = 0;
@@ -20,7 +20,7 @@ struct CpuUsage : Module {
 
     auto draw(RenderTarget& target, Rect& available) -> void override {
         update();
-        draw_block(target, available, apply_format(format, std::format("{}%", usage)));
+        draw_block(target, available, apply_format(format, std::format("{}", usage)));
     }
 
     auto update() -> void {

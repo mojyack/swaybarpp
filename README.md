@@ -35,10 +35,10 @@ sway workspace switcher (sway IPC). Click a workspace to switch to it. Filters t
 - `format`(string): strftime format string. default `"%Y-%m-%d %H:%M"`
 
 ## cpu_usage
-- `format`(string): default `"CPU {}"`
+- `format`(string): default `"CPU {}%"`
 
 ## ram_usage
-- `format`(string): default `"MEM {}"`
+- `format`(string): default `"MEM {}G"`
 
 ## loadavg
 - `format`(string): default `"LA {}"`
@@ -46,13 +46,13 @@ sway workspace switcher (sway IPC). Click a workspace to switch to it. Filters t
 ## temp
 Reads a hwmon sysfs temperature input.
 - `path`(string, required): sysfs file, e.g. `/sys/class/hwmon/hwmon0/temp3_input`
-- `format`(string): default `"{}"`
+- `format`(string): default `"{}°C"`
 
 ## battery
 Reads `/sys/class/power_supply/<name>/`. Click to cycle the display style.
 - `name`(string, required): power-supply name, e.g. `BAT0`
 - `charge`(string): sysfs metric base, `charge` or `energy` (reads `<charge>_now` / `<charge>_full`)
-- `format`(string): wraps the value in `simple` style. default `"BAT {}"`
+- `format`(string): wraps the value in `simple` style. default `"BAT {}%"`
 - `style`(string): initial display style. default `"simple"`
   - `simple`: text style
   - `graph`: battery icon graphic
@@ -67,7 +67,7 @@ with `wl` is treated as wireless, otherwise wired.
 
 ## pipewire
 Native libpipewire. Click to mute, scroll to change volume.
-- `format`(string): wraps the volume percentage. default `"VOL {}"`
+- `format`(string): wraps the volume percentage. default `"VOL {}%"`
 - `format_muted`(string): shown alone when muted. default `"MUTE"`
 
 ## file

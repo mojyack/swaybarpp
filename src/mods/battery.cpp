@@ -80,7 +80,7 @@ auto draw_graph(RenderTarget& target, Rect& available, const uint32_t percent, c
 struct Battery : Module {
     std::string sysfs;
     std::string now_file;
-    std::string format     = "BAT {}";
+    std::string format     = "BAT {}%";
     Style       style      = Style::Simple;
     double      graph_size = 0.5;
     uint32_t    full;
@@ -117,7 +117,7 @@ struct Battery : Module {
         if(style == Style::Graph) {
             draw_graph(target, available, percent, sign, graph_size);
         } else {
-            draw_block(target, available, apply_format(format, std::format("{}{}%", percent, sign)));
+            draw_block(target, available, apply_format(format, std::format("{}{}", percent, sign)));
         }
     }
 
