@@ -1,23 +1,8 @@
 #pragma once
 #include <pango/pangocairo.h>
 
+#include "cairo_util.hpp"
 #include "json/json.hpp"
-
-struct Color {
-    double r;
-    double g;
-    double b;
-    double a;
-
-    static constexpr auto from_hex(const uint32_t hex) -> Color {
-        return Color{
-            .r = ((hex >> 24) & 0xff) / 255.0,
-            .g = ((hex >> 16) & 0xff) / 255.0,
-            .b = ((hex >> 8) & 0xff) / 255.0,
-            .a = ((hex >> 0) & 0xff) / 255.0,
-        };
-    }
-};
 
 struct Rect {
     double x;

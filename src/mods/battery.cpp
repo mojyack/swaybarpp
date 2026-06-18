@@ -1,5 +1,3 @@
-#include <numbers>
-
 #include "../macros/unwrap.hpp"
 #include "../mod.hpp"
 #include "../util/charconv.hpp"
@@ -24,16 +22,6 @@ auto state_color(const char sign) -> Color {
     default:
         return color_idle;
     }
-}
-
-auto rounded_rect(cairo_t* const cairo, const double x, const double y, const double w, const double h, const double r) -> void {
-    const auto deg = std::numbers::pi / 180.0;
-    cairo_new_sub_path(cairo);
-    cairo_arc(cairo, x + w - r, y + r, r, -90 * deg, 0 * deg);
-    cairo_arc(cairo, x + w - r, y + h - r, r, 0 * deg, 90 * deg);
-    cairo_arc(cairo, x + r, y + h - r, r, 90 * deg, 180 * deg);
-    cairo_arc(cairo, x + r, y + r, r, 180 * deg, 270 * deg);
-    cairo_close_path(cairo);
 }
 
 auto draw_graph(RenderTarget& target, Rect& available, const uint32_t percent, const char sign, const double size) -> Rect {

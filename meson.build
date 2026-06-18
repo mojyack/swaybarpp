@@ -20,6 +20,7 @@ deps = towl_deps + [
 executable(
     'swaybarpp',
     files(
+        'src/cairo_util.cpp',
         'src/main.cpp',
         'src/mod.cpp',
         'src/mods/battery.cpp',
@@ -33,9 +34,37 @@ executable(
         'src/mods/ram_usage.cpp',
         'src/mods/temp.cpp',
         'src/mods/workspace.cpp',
+        'src/shm_buffer.cpp',
         'src/sway_ipc.cpp',
+        'src/volume.cpp',
         'src/window.cpp',
     ) + towl_files + tinyjson_files,
+    dependencies: deps,
+    install: true,
+)
+
+slider_files = files(
+    'src/cairo_util.cpp',
+    'src/shm_buffer.cpp',
+    'src/slider/slider_app.cpp',
+    'src/slider/slider_window.cpp',
+)
+
+executable(
+    'swaybarpp-volume',
+    files(
+        'src/volume.cpp',
+        'src/volume_slider.cpp',
+    ) + slider_files + towl_files + tinyjson_files,
+    dependencies: deps,
+    install: true,
+)
+
+executable(
+    'swaybarpp-brightness',
+    files(
+        'src/brightness_slider.cpp',
+    ) + slider_files + towl_files,
     dependencies: deps,
     install: true,
 )
