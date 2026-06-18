@@ -15,7 +15,7 @@
         "pipewire": {"format": " {}", "format_muted": ""},
         "battery": {"name": "BAT0", "format": " {}", "style": "graph"},
         "temp": {"path": "/sys/class/hwmon/hwmon0/temp0_input", "format": " {}"},
-        "network": {"format": " {}", "offline": "⚠"},
+        "network": {"wired": " {}", "wireless": " {}", "offline": "⚠"},
         "loadavg": {"format": "LA {}"},
         "ram_usage": {"format": " {}"},
         "cpu_usage": {"format": " {}"},

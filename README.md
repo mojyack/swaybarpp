@@ -59,8 +59,10 @@ Reads `/sys/class/power_supply/<name>/`. Click to cycle the display style.
 - `size`(number): icon height as a fraction of the bar height, `graph` style only. default `0.5`
 
 ## network
-Active default-route interface
-- `format`(string): default `"{}"`
+Active default-route interface. The interface name fills `{}`; a name starting
+with `wl` is treated as wireless, otherwise wired.
+- `wired`(string): format for a wired interface. default `"{}"`
+- `wireless`(string): format for a wireless interface (name starts with `wl`). default `"{}"`
 - `offline`(string): shown alone when there is no default route. default `"!"`
 
 ## pipewire
