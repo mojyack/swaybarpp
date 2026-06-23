@@ -13,6 +13,7 @@
 #include <spa/pod/iter.h>
 
 #include "macros/unwrap.hpp"
+#include "util/charconv.hpp"
 #include "volume.hpp"
 #include "json/json.hpp"
 
@@ -91,7 +92,7 @@ auto VolumeControl::on_metadata_property(void* const data, const uint32_t /*subj
 
 auto VolumeControl::on_node_param(void* const data, const int /*seq*/, const uint32_t id, const uint32_t /*index*/, const uint32_t /*next*/, const spa_pod* const param) -> void {
     auto& self = *std::bit_cast<VolumeControl*>(data);
-    if(id != SPA_PARAM_Props || param == nullptr) {
+    if(id != SPA_PARAM_Props || param == nullptr || self.route_resolved) {
         return;
     }
     const auto object = std::bit_cast<const spa_pod_object*>(param);
@@ -127,15 +128,12 @@ auto VolumeControl::on_node_info(void* const data, const pw_node_info* const inf
     const auto device_id_s = spa_dict_lookup(info->props, "device.id");
     const auto cpd_s       = spa_dict_lookup(info->props, "card.profile.device");
     if(device_id_s == nullptr || cpd_s == nullptr) {
-        // virtual/software sink
-        self.unbind_device();
-    } else {
-        // hardware sink backed by ALSA card
-        const auto did = uint32_t(std::strtoul(device_id_s, nullptr, 10));
-        const auto cpd = int32_t(std::strtol(cpd_s, nullptr, 10));
-        if(self.device == nullptr || self.device_id != did || self.route_device != cpd) {
-            self.bind_device(did, cpd);
-        }
+        return;
+    }
+    unwrap(did, from_chars<uint32_t>(device_id_s));
+    unwrap(cpd, from_chars<int32_t>(cpd_s));
+    if(self.device == nullptr || self.device_id != did || self.route_device != cpd) {
+        self.bind_device(did, cpd);
     }
 }
 
