@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include <pango/pangocairo.h>
 
 #include "cairo_util.hpp"

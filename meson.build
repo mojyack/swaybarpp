@@ -15,6 +15,7 @@ deps = towl_deps + [
     dependency('cairo'),
     dependency('pangocairo'),
     dependency('libpipewire-0.3'),
+    dependency('coop', version : ['>=1.3.0', '<1.4.0'])
 ]
 
 executable(

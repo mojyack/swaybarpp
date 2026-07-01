@@ -1,3 +1,5 @@
+#include <array>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -17,10 +19,10 @@ auto draw_block(RenderTarget& target, Rect& available, const std::string_view te
 
     const auto block_width = text_width + padding * 2;
     const auto block       = Rect{
-              .x = target.align == Align::Left ? available.x : available.x + available.w - block_width,
-              .y = available.y,
-              .w = double(block_width),
-              .h = available.h,
+        .x = target.align == Align::Left ? available.x : available.x + available.w - block_width,
+        .y = available.y,
+        .w = double(block_width),
+        .h = available.h,
     };
     if(target.align == Align::Left) {
         available.x += block_width;
