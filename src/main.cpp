@@ -9,39 +9,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "color_json.hpp"
 #include "macros/unwrap.hpp"
+#include "serde/json/format.hpp"
 #include "util/charconv.hpp"
 #include "window.hpp"
-
-// serde support
-
-namespace serde {
-struct JsonFormat;
-}
-
-namespace serde::json {
-auto serialize_element(JsonFormat& /*format*/, ::json::Value& /*value*/, const Color& /*data*/) -> bool {
-    return false;
-}
-
-auto deserialize_element(JsonFormat& /*format*/, const ::json::Value& value, Color& data) -> bool {
-    unwrap(node, value.get<::json::String>());
-    auto str = std::string_view(node.value);
-    if(str.starts_with('#')) {
-        str.remove_prefix(1);
-    }
-    auto hex = std::string(str);
-    if(hex.size() == 6) {
-        hex += "ff"; // default to opaque
-    }
-    ensure(hex.size() == 8);
-    unwrap(num, from_chars<uint32_t>(hex, 16));
-    data = Color::from_hex(num);
-    return true;
-}
-} // namespace serde::json
-
-#include "serde/json/format.hpp"
 
 namespace {
 auto default_config_path() -> std::string {

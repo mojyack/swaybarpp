@@ -69,3 +69,30 @@ executable(
     dependencies: deps,
     install: true,
 )
+
+subdir('submodules/crypto-utils/src')  # crypto_utils_deps
+
+executable(
+    'swaybarpp-lock',
+    files(
+        'src/cairo_util.cpp',
+        'src/crypto/sha.cpp',
+        'src/lock.cpp',
+        'src/lock/lock_window.cpp',
+        'src/lock/passwd.cpp',
+        'src/shm_buffer.cpp',
+    ) + towl_files + tinyjson_files,
+    dependencies: deps + crypto_utils_deps,
+    install: true,
+)
+
+executable(
+    'swaybarpp-lock-passwd',
+    files(
+        'src/crypto/sha.cpp',
+        'src/lock/passwd.cpp',
+        'src/lock_passwd_main.cpp',
+    ),
+    dependencies: crypto_utils_deps,
+    install: true,
+)
