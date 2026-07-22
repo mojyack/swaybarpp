@@ -51,10 +51,7 @@ struct LockConfig {
     std::optional<std::string>              SerdeField(passwd_file);
     std::optional<int>                      SerdeField(timeout);
     std::optional<std::vector<std::string>> SerdeField(suspend_command);
-    std::optional<double>                   SerdeField(button_r);
-    std::optional<double>                   SerdeField(pitch);
-    std::optional<double>                   SerdeField(grid_off);
-    std::optional<double>                   SerdeField(dots_gap);
+    std::optional<double>                   SerdeField(scale);
     SerdeFieldsEnd;
 };
 } // namespace
@@ -79,12 +76,8 @@ auto main(const int argc, const char* const* const argv) -> int {
     const auto font       = pango_font_description_from_string(lock_config.font.value_or("sans 14").data());
     const auto background = lock_config.background.value_or(Color::from_hex(0x1d1f21ff));
     const auto foreground = lock_config.foreground.value_or(Color::from_hex(0xc5c8c6ff));
-    auto       theme      = LockTheme();
-    theme.button_r        = lock_config.button_r.value_or(theme.button_r);
-    theme.pitch           = lock_config.pitch.value_or(theme.pitch);
-    theme.grid_off        = lock_config.grid_off.value_or(theme.grid_off);
-    theme.dots_gap        = lock_config.dots_gap.value_or(theme.dots_gap);
-    auto window           = Window(background, foreground, font, passwd_file.pin_len, theme);
+    const auto scale      = lock_config.scale.value_or(1.0);
+    auto       window     = Window(background, foreground, font, passwd_file.pin_len, scale);
 
     // suspend on inactivity
     const auto timer       = FileDescriptor(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK));

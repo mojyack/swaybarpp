@@ -10,9 +10,6 @@
     "timeout": 10,
     "suspend_command": ["doas", "/usr/local/bin/suspend"],
 
-    // optional: numpad geometry in logical px (defaults shown)
-    "button_r": 38,  // numpad button radius
-    "pitch": 96,     // distance between button centers
-    "grid_off": 40,  // grid center offset from screen center
-    "dots_gap": 78,  // distance from top button row to the dots
+    // optional: scale every geometry (numpad, dots, font size); default 1.0
+    "scale": 1.0,
 }

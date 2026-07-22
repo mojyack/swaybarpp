@@ -16,11 +16,14 @@
 
 class Window;
 
-struct LockTheme {
-    double button_r = 38.0; // numpad button radius
-    double pitch    = 96.0; // distance between button centers
-    double grid_off = 40.0; // grid center offset from screen center
-    double dots_gap = 78.0; // distance from top button row to the dots
+// numpad geometry in logical px; every field is multiplied by the config `scale`
+struct LockGeometry {
+    double button_r  = 38.0; // numpad button radius
+    double pitch     = 96.0; // distance between button centers
+    double grid_off  = 40.0; // grid center offset from screen center
+    double dots_gap  = 78.0; // distance from top button row to the dots
+    double dot_r     = 6.0;  // pin dot radius
+    double dot_pitch = 28.0; // distance between pin dots
 };
 
 // one session-lock surface, bound to a single output
@@ -78,7 +81,7 @@ class Window : towl::OutputCallbacks,
     PangoFontDescription* font;
     PangoFontDescription* digit_font = nullptr;
     size_t                pin_len;
-    LockTheme             theme;
+    LockGeometry          geometry;
 
     std::vector<wl_output*>                   outputs; // live outputs
     std::vector<std::unique_ptr<LockSurface>> surfaces;
@@ -143,6 +146,6 @@ class Window : towl::OutputCallbacks,
     auto roundtrip() -> void;
     auto redraw() -> void;
 
-    Window(Color background, Color foreground, PangoFontDescription* font, size_t pin_len, const LockTheme& theme);
+    Window(Color background, Color foreground, PangoFontDescription* font, size_t pin_len, double scale);
     ~Window();
 };

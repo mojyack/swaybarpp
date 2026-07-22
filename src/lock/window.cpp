@@ -11,9 +11,6 @@
 
 namespace {
 namespace theme {
-constexpr auto dot_r     = 6.0;
-constexpr auto dot_pitch = 28.0;
-
 constexpr auto button_alpha = 0.12;
 constexpr auto flash_alpha  = 0.35; // extra fill added to a freshly-pressed button
 constexpr auto flash_decay  = 0.12; // fade-out per 16ms animation tick
@@ -112,8 +109,8 @@ auto LockSurface::on_ext_session_lock_surface_configure(const uint32_t width, co
 auto LockSurface::cell_center(const int index) const -> std::pair<double, double> {
     const auto col = index % 3;
     const auto row = index / 3;
-    const auto cx  = logical_width / 2.0 + (col - 1) * app.theme.pitch;
-    const auto cy  = logical_height / 2.0 + app.theme.grid_off + (row - 1.5) * app.theme.pitch;
+    const auto cx  = logical_width / 2.0 + (col - 1) * app.geometry.pitch;
+    const auto cy  = logical_height / 2.0 + app.geometry.grid_off + (row - 1.5) * app.geometry.pitch;
     return {cx, cy};
 }
 
@@ -125,7 +122,7 @@ auto LockSurface::hit_test(const double x, const double y) const -> int {
         const auto [cx, cy] = cell_center(i);
         const auto dx       = x - cx;
         const auto dy       = y - cy;
-        if(dx * dx + dy * dy <= app.theme.button_r * app.theme.button_r) {
+        if(dx * dx + dy * dy <= app.geometry.button_r * app.geometry.button_r) {
             return i;
         }
     }
@@ -177,12 +174,12 @@ auto LockSurface::redraw() -> void {
 
     // pin dots
     const auto n      = int(app.pin_len);
-    const auto dots_y = logical_height / 2.0 + app.theme.grid_off - 1.5 * app.theme.pitch - app.theme.dots_gap;
-    const auto dots_x = logical_width / 2.0 - (n - 1) * theme::dot_pitch / 2.0;
+    const auto dots_y = logical_height / 2.0 + app.geometry.grid_off - 1.5 * app.geometry.pitch - app.geometry.dots_gap;
+    const auto dots_x = logical_width / 2.0 - (n - 1) * app.geometry.dot_pitch / 2.0;
     const auto dot_fg = app.error ? theme::error_color : app.success ? theme::success_color
                                                                      : app.foreground;
     for(auto i = 0; i < n; i += 1) {
-        cairo_arc(cairo, dots_x + i * theme::dot_pitch, dots_y, theme::dot_r, 0, 2 * std::numbers::pi);
+        cairo_arc(cairo, dots_x + i * app.geometry.dot_pitch, dots_y, app.geometry.dot_r, 0, 2 * std::numbers::pi);
         set_color(cairo, dot_fg);
         if(i < int(app.entered.size()) || app.error) {
             cairo_fill(cairo);
@@ -201,7 +198,7 @@ auto LockSurface::redraw() -> void {
         const auto flash    = i == app.flash_cell ? app.flash_phase : 0.0;
         if(i == backspace_cell) {
             if(flash > 0.0) {
-                cairo_arc(cairo, cx, cy, app.theme.button_r, 0, 2 * std::numbers::pi);
+                cairo_arc(cairo, cx, cy, app.geometry.button_r, 0, 2 * std::numbers::pi);
                 cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, flash * theme::flash_alpha);
                 cairo_fill(cairo);
             }
@@ -210,7 +207,7 @@ auto LockSurface::redraw() -> void {
             }
             continue;
         }
-        cairo_arc(cairo, cx, cy, app.theme.button_r, 0, 2 * std::numbers::pi);
+        cairo_arc(cairo, cx, cy, app.geometry.button_r, 0, 2 * std::numbers::pi);
         cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, theme::button_alpha + flash * theme::flash_alpha);
         cairo_fill(cairo);
         const auto label = std::array{cell_digit(i), '\0'};
@@ -487,13 +484,19 @@ auto Window::redraw() -> void {
     display.flush();
 }
 
-Window::Window(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len, const LockTheme& theme)
+Window::Window(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len, const double scale)
     : registry(display.get_registry()),
       background(background),
       foreground(foreground),
       font(font),
-      pin_len(pin_len),
-      theme(theme) {
+      pin_len(pin_len) {
+    geometry.button_r *= scale;
+    geometry.pitch *= scale;
+    geometry.grid_off *= scale;
+    geometry.dots_gap *= scale;
+    geometry.dot_r *= scale;
+    geometry.dot_pitch *= scale;
+
     registry.set_binders({&compositor_binder, &shm_binder, &seat_binder, &output_binder, &lock_manager_binder});
     display.roundtrip();
     ASSERT(!compositor_binder.interfaces.empty(), "compositor not available");
@@ -503,8 +506,9 @@ Window::Window(const Color background, const Color foreground, PangoFontDescript
     shm          = std::bit_cast<towl::Shm*>(shm_binder.interfaces[0].get());
     lock_manager = std::bit_cast<towl::SessionLockManager*>(lock_manager_binder.interfaces[0].get());
 
+    pango_font_description_set_size(font, int(pango_font_description_get_size(font) * scale));
     digit_font = pango_font_description_copy(font);
-    pango_font_description_set_size(digit_font, 26 * PANGO_SCALE);
+    pango_font_description_set_size(digit_font, int(26 * scale * PANGO_SCALE));
 
     anim_timer = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
 
