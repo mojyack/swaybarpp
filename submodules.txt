@@ -1,5 +1,5 @@
 cutil https://github.com/mojyack/cutil.git f614447a9f37e3b0cfb50017ceb3ab7f91693ffe
 cutil-macros https://github.com/mojyack/cutil-macros.git e3d95d06be45548f4bd5a195a6c9a54a7b24f072
-towl https://github.com/mojyack/towl.git 29c985b9df0be21345e89d33d388f7bc97b18ac2
+towl https://github.com/mojyack/towl.git e4edc746fc29370d63c23e155a0143389177957e
 serde https://github.com/mojyack/serde.git f3dcb91db35d93482e75b4980d5d20e12358b770
 crypto-utils https://github.com/mojyack/crypto-utils.git fead15d35f50809a057fc544966afaffa3e6d3c8
