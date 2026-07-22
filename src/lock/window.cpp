@@ -11,10 +11,6 @@
 
 namespace {
 namespace theme {
-constexpr auto button_r  = 38.0; // numpad button radius
-constexpr auto pitch     = 96.0; // distance between button centers
-constexpr auto grid_off  = 40.0; // grid center offset from screen center
-constexpr auto dots_gap  = 78.0; // distance from top button row to the dots
 constexpr auto dot_r     = 6.0;
 constexpr auto dot_pitch = 28.0;
 
@@ -113,8 +109,8 @@ auto LockSurface::on_ext_session_lock_surface_configure(const uint32_t width, co
 auto LockSurface::cell_center(const int index) const -> std::pair<double, double> {
     const auto col = index % 3;
     const auto row = index / 3;
-    const auto cx  = logical_width / 2.0 + (col - 1) * theme::pitch;
-    const auto cy  = logical_height / 2.0 + theme::grid_off + (row - 1.5) * theme::pitch;
+    const auto cx  = logical_width / 2.0 + (col - 1) * app.theme.pitch;
+    const auto cy  = logical_height / 2.0 + app.theme.grid_off + (row - 1.5) * app.theme.pitch;
     return {cx, cy};
 }
 
@@ -126,7 +122,7 @@ auto LockSurface::hit_test(const double x, const double y) const -> int {
         const auto [cx, cy] = cell_center(i);
         const auto dx       = x - cx;
         const auto dy       = y - cy;
-        if(dx * dx + dy * dy <= theme::button_r * theme::button_r) {
+        if(dx * dx + dy * dy <= app.theme.button_r * app.theme.button_r) {
             return i;
         }
     }
@@ -178,7 +174,7 @@ auto LockSurface::redraw() -> void {
 
     // pin dots
     const auto n      = int(app.pin_len);
-    const auto dots_y = logical_height / 2.0 + theme::grid_off - 1.5 * theme::pitch - theme::dots_gap;
+    const auto dots_y = logical_height / 2.0 + app.theme.grid_off - 1.5 * app.theme.pitch - app.theme.dots_gap;
     const auto dots_x = logical_width / 2.0 - (n - 1) * theme::dot_pitch / 2.0;
     const auto dot_fg = app.error ? theme::error_color : app.foreground;
     for(auto i = 0; i < n; i += 1) {
@@ -201,7 +197,7 @@ auto LockSurface::redraw() -> void {
         const auto flash    = i == app.flash_cell ? app.flash_phase : 0.0;
         if(i == backspace_cell) {
             if(flash > 0.0) {
-                cairo_arc(cairo, cx, cy, theme::button_r, 0, 2 * std::numbers::pi);
+                cairo_arc(cairo, cx, cy, app.theme.button_r, 0, 2 * std::numbers::pi);
                 cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, flash * theme::flash_alpha);
                 cairo_fill(cairo);
             }
@@ -210,7 +206,7 @@ auto LockSurface::redraw() -> void {
             }
             continue;
         }
-        cairo_arc(cairo, cx, cy, theme::button_r, 0, 2 * std::numbers::pi);
+        cairo_arc(cairo, cx, cy, app.theme.button_r, 0, 2 * std::numbers::pi);
         cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, theme::button_alpha + flash * theme::flash_alpha);
         cairo_fill(cairo);
         const auto label = std::array{cell_digit(i), '\0'};
@@ -463,12 +459,13 @@ auto Window::redraw() -> void {
     display.flush();
 }
 
-Window::Window(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len)
+Window::Window(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len, const LockTheme& theme)
     : registry(display.get_registry()),
       background(background),
       foreground(foreground),
       font(font),
-      pin_len(pin_len) {
+      pin_len(pin_len),
+      theme(theme) {
     registry.set_binders({&compositor_binder, &shm_binder, &seat_binder, &output_binder, &lock_manager_binder});
     display.roundtrip();
     ASSERT(!compositor_binder.interfaces.empty(), "compositor not available");

@@ -6,15 +6,22 @@
 
 #include "../cairo-util.hpp"
 #include "../shm-buffer.hpp"
-#include "../util/fd.hpp"
 #include "../towl/compositor.hpp"
 #include "../towl/display.hpp"
 #include "../towl/output.hpp"
 #include "../towl/registry.hpp"
 #include "../towl/seat.hpp"
 #include "../towl/session-lock.hpp"
+#include "../util/fd.hpp"
 
 class Window;
+
+struct LockTheme {
+    double button_r = 38.0; // numpad button radius
+    double pitch    = 96.0; // distance between button centers
+    double grid_off = 40.0; // grid center offset from screen center
+    double dots_gap = 78.0; // distance from top button row to the dots
+};
 
 // one session-lock surface, bound to a single output
 struct LockSurface : towl::SurfaceCallbacks, towl::SessionLockSurfaceCallbacks {
@@ -71,6 +78,7 @@ class Window : towl::OutputCallbacks,
     PangoFontDescription* font;
     PangoFontDescription* digit_font = nullptr;
     size_t                pin_len;
+    LockTheme             theme;
 
     std::vector<wl_output*>                   outputs; // live outputs
     std::vector<std::unique_ptr<LockSurface>> surfaces;
@@ -130,6 +138,6 @@ class Window : towl::OutputCallbacks,
     auto roundtrip() -> void;
     auto redraw() -> void;
 
-    Window(Color background, Color foreground, PangoFontDescription* font, size_t pin_len);
+    Window(Color background, Color foreground, PangoFontDescription* font, size_t pin_len, const LockTheme& theme);
     ~Window();
 };
