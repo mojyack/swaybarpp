@@ -1,0 +1,18 @@
+{
+    "font": "monospace, Font Awesome 6 Free 11",
+    "background": "#2e3440",
+    "foreground": "#e5e9f0",
+
+    // optional: default to $XDG_DATA_HOME/swaybarpp/passwd
+    "passwd_file": "/home/mojyack/.local/share/swaybarpp/passwd",
+
+    // optional: execute "suspend_command" on "timeout" inactivity
+    "timeout": 10,
+    "suspend_command": ["doas", "/usr/local/bin/suspend"],
+
+    // optional: numpad geometry in logical px (defaults shown)
+    "button_r": 38,  // numpad button radius
+    "pitch": 96,     // distance between button centers
+    "grid_off": 40,  // grid center offset from screen center
+    "dots_gap": 78,  // distance from top button row to the dots
+}
