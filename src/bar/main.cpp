@@ -9,10 +9,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "color_json.hpp"
-#include "macros/unwrap.hpp"
-#include "serde/json/format.hpp"
-#include "util/charconv.hpp"
+#include "../color-json.hpp"
+#include "../macros/unwrap.hpp"
+#include "../serde/json/format.hpp"
+#include "mod.hpp"
 #include "window.hpp"
 
 namespace {

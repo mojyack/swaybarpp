@@ -4,15 +4,20 @@
 #include <string>
 #include <vector>
 
-#include "../cairo_util.hpp"
-#include "../shm_buffer.hpp"
-#include "../towl/towl.hpp"
+#include "../cairo-util.hpp"
+#include "../shm-buffer.hpp"
+#include "../towl/compositor.hpp"
+#include "../towl/display.hpp"
+#include "../towl/output.hpp"
+#include "../towl/registry.hpp"
+#include "../towl/seat.hpp"
+#include "../towl/session-lock.hpp"
 
-class LockWindow;
+class Window;
 
 // one session-lock surface, bound to a single output
 struct LockSurface : towl::SurfaceCallbacks, towl::SessionLockSurfaceCallbacks {
-    LockWindow&              app;
+    Window&                  app;
     wl_output*               output;
     towl::Surface            surface;
     towl::SessionLockSurface lock_surface;
@@ -35,15 +40,15 @@ struct LockSurface : towl::SurfaceCallbacks, towl::SessionLockSurfaceCallbacks {
     auto acquire_buffer() -> Buffer*;
     auto redraw() -> void;
 
-    LockSurface(LockWindow& app, wl_output* output);
+    LockSurface(Window& app, wl_output* output);
 };
 
 // manages one LockSurface per output and the shared wayland state
-class LockWindow : towl::OutputCallbacks,
-                   towl::KeyboardCallbacks,
-                   towl::PointerCallbacks,
-                   towl::TouchCallbacks,
-                   towl::SessionLockCallbacks {
+class Window : towl::OutputCallbacks,
+               towl::KeyboardCallbacks,
+               towl::PointerCallbacks,
+               towl::TouchCallbacks,
+               towl::SessionLockCallbacks {
     friend struct LockSurface;
 
   private:
@@ -115,6 +120,6 @@ class LockWindow : towl::OutputCallbacks,
     auto roundtrip() -> void;
     auto redraw() -> void;
 
-    LockWindow(Color background, Color foreground, PangoFontDescription* font, size_t pin_len);
-    ~LockWindow();
+    Window(Color background, Color foreground, PangoFontDescription* font, size_t pin_len);
+    ~Window();
 };

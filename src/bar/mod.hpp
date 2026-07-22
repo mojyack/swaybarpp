@@ -3,8 +3,8 @@
 
 #include <pango/pangocairo.h>
 
-#include "cairo_util.hpp"
-#include "json/json.hpp"
+#include "../cairo-util.hpp"
+#include "../json/json.hpp"
 
 struct Rect {
     double x;

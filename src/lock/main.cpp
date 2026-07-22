@@ -5,13 +5,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "color_json.hpp"
-#include "lock/lock_window.hpp"
-#include "lock/passwd.hpp"
-#include "macros/unwrap.hpp"
-#include "serde/json/format.hpp"
-#include "util/assert.hpp"
-#include "util/file-io.hpp"
+#include "../color-json.hpp"
+#include "../macros/unwrap.hpp"
+#include "../serde/json/format.hpp"
+#include "../util/assert.hpp"
+#include "../util/file-io.hpp"
+#include "passwd-file.hpp"
+#include "window.hpp"
 
 namespace {
 auto default_config_path() -> std::string {
@@ -75,7 +75,7 @@ auto main(const int argc, const char* const* const argv) -> int {
     const auto font       = pango_font_description_from_string(lock_config.font.value_or("sans 14").data());
     const auto background = lock_config.background.value_or(Color::from_hex(0x1d1f21ff));
     const auto foreground = lock_config.foreground.value_or(Color::from_hex(0xc5c8c6ff));
-    auto       window     = LockWindow(background, foreground, font, passwd_file.pin_len);
+    auto       window     = Window(background, foreground, font, passwd_file.pin_len);
 
     // suspend on inactivity
     const auto timer       = FileDescriptor(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK));

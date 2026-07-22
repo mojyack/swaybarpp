@@ -8,8 +8,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "macros/assert.hpp"
-#include "sway_ipc.hpp"
+#include "../macros/assert.hpp"
+#include "sway-ipc.hpp"
 
 namespace sway_ipc {
 auto connect(const char* const path) -> std::optional<FileDescriptor> {

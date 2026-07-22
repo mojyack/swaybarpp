@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #include "macros/assert.hpp"
-#include "shm_buffer.hpp"
+#include "shm-buffer.hpp"
 
 namespace {
 auto make_shm(const size_t size) -> FileDescriptor {

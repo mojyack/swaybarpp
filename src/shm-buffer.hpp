@@ -3,7 +3,7 @@
 
 #include <cairo/cairo.h>
 
-#include "towl/towl.hpp"
+#include "towl/shm.hpp"
 #include "util/fd.hpp"
 
 struct Buffer {

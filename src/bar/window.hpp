@@ -7,9 +7,14 @@
 
 #include <cairo/cairo.h>
 
-#include "mod.hpp"
-#include "shm_buffer.hpp"
-#include "towl/towl.hpp"
+#include "../cairo-util.hpp"
+#include "../shm-buffer.hpp"
+#include "../towl/compositor.hpp"
+#include "../towl/display.hpp"
+#include "../towl/layer-shell.hpp"
+#include "../towl/output.hpp"
+#include "../towl/registry.hpp"
+#include "../towl/seat.hpp"
 
 class Window;
 

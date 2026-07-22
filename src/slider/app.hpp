@@ -2,7 +2,7 @@
 #include <string>
 #include <string_view>
 
-#include "slider_model.hpp"
+#include "model.hpp"
 
 namespace slider {
 auto socket_path(std::string_view name) -> std::string;

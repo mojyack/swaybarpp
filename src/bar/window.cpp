@@ -2,7 +2,7 @@
 
 #include <linux/input-event-codes.h>
 
-#include "macros/assert.hpp"
+#include "../macros/assert.hpp"
 #include "window.hpp"
 
 // bar

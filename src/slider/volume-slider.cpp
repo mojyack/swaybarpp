@@ -1,7 +1,7 @@
-#include "macros//assert.hpp"
-#include "slider/slider_app.hpp"
-#include "slider/slider_model.hpp"
-#include "volume.hpp"
+#include "../macros/assert.hpp"
+#include "../volume.hpp"
+#include "app.hpp"
+#include "model.hpp"
 
 namespace {
 struct VolumeModel : SliderModel {

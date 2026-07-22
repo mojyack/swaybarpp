@@ -3,14 +3,18 @@
 #include <memory>
 #include <vector>
 
-#include "../shm_buffer.hpp"
-#include "../towl/towl.hpp"
-#include "slider_model.hpp"
+#include "../shm-buffer.hpp"
+#include "../towl/compositor.hpp"
+#include "../towl/display.hpp"
+#include "../towl/layer-shell.hpp"
+#include "../towl/registry.hpp"
+#include "../towl/seat.hpp"
+#include "model.hpp"
 
-class SliderWindow : towl::SurfaceCallbacks,
-                     towl::LayerSurfaceCallbacks,
-                     towl::PointerCallbacks,
-                     towl::TouchCallbacks {
+class Window : towl::SurfaceCallbacks,
+               towl::LayerSurfaceCallbacks,
+               towl::PointerCallbacks,
+               towl::TouchCallbacks {
   private:
     towl::Display          display;
     towl::Registry         registry;
@@ -72,5 +76,5 @@ class SliderWindow : towl::SurfaceCallbacks,
     auto dispatch() -> bool;
     auto redraw() -> void;
 
-    SliderWindow(SliderModel& model, std::function<void()> on_activity);
+    Window(SliderModel& model, std::function<void()> on_activity);
 };

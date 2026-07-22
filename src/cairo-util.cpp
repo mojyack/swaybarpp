@@ -1,6 +1,6 @@
 #include <numbers>
 
-#include "cairo_util.hpp"
+#include "cairo-util.hpp"
 
 auto set_color(cairo_t* const cairo, const Color color) -> void {
     cairo_set_source_rgba(cairo, color.r, color.g, color.b, color.a);

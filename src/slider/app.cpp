@@ -8,8 +8,8 @@
 #include "../macros/unwrap.hpp"
 #include "../util/charconv.hpp"
 #include "../util/fd.hpp"
-#include "slider_app.hpp"
-#include "slider_window.hpp"
+#include "app.hpp"
+#include "window.hpp"
 
 namespace slider {
 namespace {
@@ -78,7 +78,7 @@ auto run_server(const char* const path, SliderModel& model, const char* const in
         timerfd_settime(timer, 0, &its, nullptr);
     };
 
-    auto window = SliderWindow(model, [&] { reset_timer(); });
+    auto window = Window(model, [&] { reset_timer(); });
 
     apply_command(model, initial_cmd);
     window.redraw();

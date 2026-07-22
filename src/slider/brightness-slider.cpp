@@ -3,11 +3,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "macros/unwrap.hpp"
-#include "slider/slider_app.hpp"
-#include "slider/slider_model.hpp"
-#include "util/charconv.hpp"
-#include "util/fd.hpp"
+#include "../macros/unwrap.hpp"
+#include "../util/charconv.hpp"
+#include "../util/fd.hpp"
+#include "app.hpp"
+#include "model.hpp"
 
 namespace {
 auto read_int(const char* const path) -> std::optional<size_t> {

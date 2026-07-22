@@ -6,9 +6,9 @@
 #include <linux/input-event-codes.h>
 #include <pango/pangocairo.h>
 
-#include "../cairo_util.hpp"
+#include "../cairo-util.hpp"
 #include "../macros/assert.hpp"
-#include "slider_window.hpp"
+#include "window.hpp"
 
 namespace {
 namespace theme {
@@ -33,15 +33,15 @@ constexpr auto button_on_color = Color{0xcc / 255.0, 0x66 / 255.0, 0x66 / 255.0}
 }; // namespace theme
 } // namespace
 
-auto SliderWindow::track_top() const -> double {
+auto Window::track_top() const -> double {
     return theme::pad + theme::label_h;
 }
 
-auto SliderWindow::track_bottom() const -> double {
+auto Window::track_bottom() const -> double {
     return has_button ? logical_height - theme::pad - theme::button_h - theme::gap : logical_height - theme::pad;
 }
 
-auto SliderWindow::on_button() const -> bool {
+auto Window::on_button() const -> bool {
     if(!has_button) {
         return false;
     }
@@ -52,11 +52,11 @@ auto SliderWindow::on_button() const -> bool {
     return pointer_x >= x0 && pointer_x <= x1 && pointer_y >= y0 && pointer_y <= y1;
 }
 
-auto SliderWindow::in_track() const -> bool {
+auto Window::in_track() const -> bool {
     return pointer_x >= 0 && pointer_x <= double(logical_width) && pointer_y >= track_top() - 8 && pointer_y <= track_bottom() + 8;
 }
 
-auto SliderWindow::acquire_buffer() -> Buffer* {
+auto Window::acquire_buffer() -> Buffer* {
     const auto pixel_width  = size_t(logical_width * scale);
     const auto pixel_height = size_t(logical_height * scale);
     if(pixel_width == 0 || pixel_height == 0) {
@@ -77,7 +77,7 @@ auto SliderWindow::acquire_buffer() -> Buffer* {
     return buffers.back().get();
 }
 
-auto SliderWindow::draw(cairo_t* const cairo) -> void {
+auto Window::draw(cairo_t* const cairo) -> void {
     const auto font = pango_font_description_from_string("sans 11");
 
     const auto W      = double(logical_width);
@@ -123,7 +123,7 @@ auto SliderWindow::draw(cairo_t* const cairo) -> void {
     pango_font_description_free(font);
 }
 
-auto SliderWindow::redraw() -> void {
+auto Window::redraw() -> void {
     if(!configured) {
         return;
     }
@@ -150,7 +150,7 @@ auto SliderWindow::redraw() -> void {
     buffer->busy = true;
 }
 
-auto SliderWindow::handle_press() -> void {
+auto Window::handle_press() -> void {
     if(on_button()) {
         model.button_press();
     } else if(in_track()) {
@@ -163,7 +163,7 @@ auto SliderWindow::handle_press() -> void {
     redraw();
 }
 
-auto SliderWindow::handle_motion() -> void {
+auto Window::handle_motion() -> void {
     if(!dragging) {
         return;
     }
@@ -175,11 +175,11 @@ auto SliderWindow::handle_motion() -> void {
     redraw();
 }
 
-auto SliderWindow::handle_release() -> void {
+auto Window::handle_release() -> void {
     dragging = false;
 }
 
-auto SliderWindow::on_wl_surface_preferred_buffer_scale(const int32_t factor) -> void {
+auto Window::on_wl_surface_preferred_buffer_scale(const int32_t factor) -> void {
     if(factor <= 0 || factor == scale) {
         return;
     }
@@ -187,7 +187,7 @@ auto SliderWindow::on_wl_surface_preferred_buffer_scale(const int32_t factor) ->
     redraw();
 }
 
-auto SliderWindow::on_zwlr_layer_surface_configure(const uint32_t width, const uint32_t height) -> void {
+auto Window::on_zwlr_layer_surface_configure(const uint32_t width, const uint32_t height) -> void {
     if(width > 0) {
         logical_width = width;
     }
@@ -198,22 +198,22 @@ auto SliderWindow::on_zwlr_layer_surface_configure(const uint32_t width, const u
     redraw();
 }
 
-auto SliderWindow::on_zwlr_layer_surface_closed() -> void {
+auto Window::on_zwlr_layer_surface_closed() -> void {
     running = false;
 }
 
-auto SliderWindow::on_wl_pointer_enter(wl_surface* const /*surface*/, const double x, const double y) -> void {
+auto Window::on_wl_pointer_enter(wl_surface* const /*surface*/, const double x, const double y) -> void {
     pointer_x = x;
     pointer_y = y;
 }
 
-auto SliderWindow::on_wl_pointer_motion(const double x, const double y) -> void {
+auto Window::on_wl_pointer_motion(const double x, const double y) -> void {
     pointer_x = x;
     pointer_y = y;
     handle_motion();
 }
 
-auto SliderWindow::on_wl_pointer_button(const uint32_t button, const uint32_t state) -> void {
+auto Window::on_wl_pointer_button(const uint32_t button, const uint32_t state) -> void {
     if(button != BTN_LEFT) {
         return;
     }
@@ -224,7 +224,7 @@ auto SliderWindow::on_wl_pointer_button(const uint32_t button, const uint32_t st
     }
 }
 
-auto SliderWindow::on_wl_pointer_axis(const uint32_t axis, const double value) -> void {
+auto Window::on_wl_pointer_axis(const uint32_t axis, const double value) -> void {
     if(axis != WL_POINTER_AXIS_VERTICAL_SCROLL || value == 0 || !model.available()) {
         return;
     }
@@ -233,14 +233,14 @@ auto SliderWindow::on_wl_pointer_axis(const uint32_t axis, const double value) -
     redraw();
 }
 
-auto SliderWindow::on_wl_touch_down(wl_surface* const /*surface*/, const uint32_t id, const double x, const double y) -> void {
+auto Window::on_wl_touch_down(wl_surface* const /*surface*/, const uint32_t id, const double x, const double y) -> void {
     touch_id  = id;
     pointer_x = x;
     pointer_y = y;
     handle_press();
 }
 
-auto SliderWindow::on_wl_touch_motion(const uint32_t id, const double x, const double y) -> void {
+auto Window::on_wl_touch_motion(const uint32_t id, const double x, const double y) -> void {
     if(id != touch_id) {
         return;
     }
@@ -250,7 +250,7 @@ auto SliderWindow::on_wl_touch_motion(const uint32_t id, const double x, const d
     handle_motion();
 }
 
-auto SliderWindow::on_wl_touch_up(const uint32_t id) -> void {
+auto Window::on_wl_touch_up(const uint32_t id) -> void {
     if(id != touch_id) {
         return;
     }
@@ -259,19 +259,19 @@ auto SliderWindow::on_wl_touch_up(const uint32_t id) -> void {
     handle_release();
 }
 
-auto SliderWindow::get_fd() -> int {
+auto Window::get_fd() -> int {
     return display.get_fd();
 }
 
-auto SliderWindow::flush() -> void {
+auto Window::flush() -> void {
     display.flush();
 }
 
-auto SliderWindow::dispatch() -> bool {
+auto Window::dispatch() -> bool {
     return display.dispatch();
 }
 
-SliderWindow::SliderWindow(SliderModel& model, std::function<void()> on_activity)
+Window::Window(SliderModel& model, std::function<void()> on_activity)
     : registry(display.get_registry()),
       model(model),
       on_activity(std::move(on_activity)),

@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #include "../macros/assert.hpp"
-#include "lock_window.hpp"
+#include "window.hpp"
 
 namespace {
 namespace theme {
@@ -74,7 +74,7 @@ auto key_digit(const uint32_t key) -> char {
 
 // lock surface
 
-LockSurface::LockSurface(LockWindow& app, wl_output* const output)
+LockSurface::LockSurface(Window& app, wl_output* const output)
     : app(app),
       output(output) {
     surface = app.compositor->create_surface();
@@ -213,11 +213,11 @@ auto LockSurface::redraw() -> void {
 
 // lock window
 
-auto LockWindow::add_surface(wl_output* const output) -> void {
+auto Window::add_surface(wl_output* const output) -> void {
     surfaces.push_back(std::make_unique<LockSurface>(*this, output));
 }
 
-auto LockWindow::surface_for(wl_surface* const surface) -> LockSurface* {
+auto Window::surface_for(wl_surface* const surface) -> LockSurface* {
     for(const auto& s : surfaces) {
         if(s->surface.native() == surface) {
             return s.get();
@@ -226,14 +226,14 @@ auto LockWindow::surface_for(wl_surface* const surface) -> LockSurface* {
     return nullptr;
 }
 
-auto LockWindow::prune() -> void {
+auto Window::prune() -> void {
     if(focused != nullptr && focused->closed) {
         focused = nullptr;
     }
     std::erase_if(surfaces, [](const auto& s) { return s->closed; });
 }
 
-auto LockWindow::press_digit(const char digit) -> void {
+auto Window::press_digit(const char digit) -> void {
     error = false;
     if(entered.size() < pin_len) {
         entered.push_back(digit);
@@ -252,7 +252,7 @@ auto LockWindow::press_digit(const char digit) -> void {
     redraw();
 }
 
-auto LockWindow::press_backspace() -> void {
+auto Window::press_backspace() -> void {
     error = false;
     if(!entered.empty()) {
         entered.pop_back();
@@ -263,7 +263,7 @@ auto LockWindow::press_backspace() -> void {
     redraw();
 }
 
-auto LockWindow::press_cell(const int index) -> void {
+auto Window::press_cell(const int index) -> void {
     if(const auto digit = cell_digit(index)) {
         press_digit(digit);
     } else if(index == backspace_cell) {
@@ -273,26 +273,26 @@ auto LockWindow::press_cell(const int index) -> void {
     }
 }
 
-auto LockWindow::handle_press() -> void {
+auto Window::handle_press() -> void {
     if(focused == nullptr) {
         return;
     }
     press_cell(focused->hit_test(pointer_x, pointer_y));
 }
 
-auto LockWindow::unlock() -> void {
+auto Window::unlock() -> void {
     lock.unlock_and_destroy();
     running = false;
 }
 
-auto LockWindow::on_wl_output_created(wl_output* const output) -> void {
+auto Window::on_wl_output_created(wl_output* const output) -> void {
     outputs.push_back(output);
     if(initialized) {
         add_surface(output);
     }
 }
 
-auto LockWindow::on_wl_output_removed(wl_output* const output) -> void {
+auto Window::on_wl_output_removed(wl_output* const output) -> void {
     std::erase(outputs, output);
     for(const auto& s : surfaces) {
         if(s->output == output) {
@@ -301,11 +301,11 @@ auto LockWindow::on_wl_output_removed(wl_output* const output) -> void {
     }
 }
 
-auto LockWindow::on_wl_keyboard_keymap(const uint32_t /*format*/, const int32_t fd, const uint32_t /*size*/) -> void {
+auto Window::on_wl_keyboard_keymap(const uint32_t /*format*/, const int32_t fd, const uint32_t /*size*/) -> void {
     close(fd);
 }
 
-auto LockWindow::on_wl_keyboard_key(const uint32_t key, const uint32_t state) -> void {
+auto Window::on_wl_keyboard_key(const uint32_t key, const uint32_t state) -> void {
     if(state != WL_KEYBOARD_KEY_STATE_PRESSED) {
         return;
     }
@@ -323,31 +323,31 @@ auto LockWindow::on_wl_keyboard_key(const uint32_t key, const uint32_t state) ->
     }
 }
 
-auto LockWindow::on_wl_pointer_enter(wl_surface* const surface, const double x, const double y) -> void {
+auto Window::on_wl_pointer_enter(wl_surface* const surface, const double x, const double y) -> void {
     focused   = surface_for(surface);
     pointer_x = x;
     pointer_y = y;
 }
 
-auto LockWindow::on_wl_pointer_leave(wl_surface* const surface) -> void {
+auto Window::on_wl_pointer_leave(wl_surface* const surface) -> void {
     if(focused != nullptr && focused->surface.native() == surface) {
         focused = nullptr;
     }
 }
 
-auto LockWindow::on_wl_pointer_motion(const double x, const double y) -> void {
+auto Window::on_wl_pointer_motion(const double x, const double y) -> void {
     pointer_x = x;
     pointer_y = y;
 }
 
-auto LockWindow::on_wl_pointer_button(const uint32_t button, const uint32_t state) -> void {
+auto Window::on_wl_pointer_button(const uint32_t button, const uint32_t state) -> void {
     if(button != BTN_LEFT || state != WL_POINTER_BUTTON_STATE_PRESSED) {
         return;
     }
     handle_press();
 }
 
-auto LockWindow::on_wl_touch_down(wl_surface* const surface, const uint32_t id, const double x, const double y) -> void {
+auto Window::on_wl_touch_down(wl_surface* const surface, const uint32_t id, const double x, const double y) -> void {
     if(touch_id != uint32_t(-1)) {
         return; // ignore extra simultaneous fingers
     }
@@ -358,7 +358,7 @@ auto LockWindow::on_wl_touch_down(wl_surface* const surface, const uint32_t id, 
     handle_press();
 }
 
-auto LockWindow::on_wl_touch_motion(const uint32_t id, const double x, const double y) -> void {
+auto Window::on_wl_touch_motion(const uint32_t id, const double x, const double y) -> void {
     if(id != touch_id) {
         return;
     }
@@ -366,49 +366,49 @@ auto LockWindow::on_wl_touch_motion(const uint32_t id, const double x, const dou
     pointer_y = y;
 }
 
-auto LockWindow::on_wl_touch_up(const uint32_t id) -> void {
+auto Window::on_wl_touch_up(const uint32_t id) -> void {
     if(id != touch_id) {
         return;
     }
     touch_id = -1;
 }
 
-auto LockWindow::on_ext_session_lock_locked() -> void {
+auto Window::on_ext_session_lock_locked() -> void {
     locked = true;
 }
 
-auto LockWindow::on_ext_session_lock_finished() -> void {
+auto Window::on_ext_session_lock_finished() -> void {
     // the lock was denied (another locker active) or revoked by the compositor
     failed  = true;
     running = false;
 }
 
-auto LockWindow::get_fd() -> int {
+auto Window::get_fd() -> int {
     return display.get_fd();
 }
 
-auto LockWindow::flush() -> void {
+auto Window::flush() -> void {
     display.flush();
 }
 
-auto LockWindow::dispatch() -> bool {
+auto Window::dispatch() -> bool {
     const auto ok = display.dispatch();
     prune();
     return ok;
 }
 
-auto LockWindow::roundtrip() -> void {
+auto Window::roundtrip() -> void {
     display.roundtrip();
 }
 
-auto LockWindow::redraw() -> void {
+auto Window::redraw() -> void {
     for(const auto& s : surfaces) {
         s->redraw();
     }
     display.flush();
 }
 
-LockWindow::LockWindow(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len)
+Window::Window(const Color background, const Color foreground, PangoFontDescription* const font, const size_t pin_len)
     : registry(display.get_registry()),
       background(background),
       foreground(foreground),
@@ -437,6 +437,6 @@ LockWindow::LockWindow(const Color background, const Color foreground, PangoFont
     display.roundtrip();
 }
 
-LockWindow::~LockWindow() {
+Window::~Window() {
     pango_font_description_free(digit_font);
 }

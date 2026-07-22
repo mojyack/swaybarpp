@@ -5,9 +5,9 @@
 #include <linux/input-event-codes.h>
 #include <sys/epoll.h>
 
-#include "../macros/unwrap.hpp"
+#include "../../macros/unwrap.hpp"
 #include "../mod.hpp"
-#include "../sway_ipc.hpp"
+#include "../sway-ipc.hpp"
 
 namespace {
 constexpr auto padding = 6.0;
