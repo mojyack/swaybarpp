@@ -18,6 +18,9 @@ constexpr auto button_alpha = 0.12;
 constexpr auto flash_alpha  = 0.35; // extra fill added to a freshly-pressed button
 constexpr auto flash_decay  = 0.12; // fade-out per 16ms animation tick
 constexpr auto error_color  = Color{0xbf / 255.0, 0x61 / 255.0, 0x6a / 255.0};
+
+constexpr auto success_color = Color{0x8a / 255.0, 0xbe / 255.0, 0x77 / 255.0};
+constexpr auto success_step  = 0.04; // hold progress per 16ms tick (~0.4s total)
 } // namespace theme
 
 // numpad cells: 0..8 = digits 1..9, 9 = empty, 10 = digit 0, 11 = backspace
@@ -176,7 +179,8 @@ auto LockSurface::redraw() -> void {
     const auto n      = int(app.pin_len);
     const auto dots_y = logical_height / 2.0 + app.theme.grid_off - 1.5 * app.theme.pitch - app.theme.dots_gap;
     const auto dots_x = logical_width / 2.0 - (n - 1) * theme::dot_pitch / 2.0;
-    const auto dot_fg = app.error ? theme::error_color : app.foreground;
+    const auto dot_fg = app.error ? theme::error_color : app.success ? theme::success_color
+                                                                     : app.foreground;
     for(auto i = 0; i < n; i += 1) {
         cairo_arc(cairo, dots_x + i * theme::dot_pitch, dots_y, theme::dot_r, 0, 2 * std::numbers::pi);
         set_color(cairo, dot_fg);
@@ -261,6 +265,13 @@ auto Window::start_flash(const int index) -> void {
     // the caller's press_* redraws with the fresh highlight
 }
 
+auto Window::start_success() -> void {
+    success       = true;
+    success_phase = 0.0;
+    arm_anim_timer(true);
+    redraw();
+}
+
 auto Window::press_digit(const char digit) -> void {
     error = false;
     if(entered.size() < pin_len) {
@@ -268,7 +279,7 @@ auto Window::press_digit(const char digit) -> void {
     }
     if(entered.size() >= pin_len) {
         if(on_submit && on_submit(entered)) {
-            unlock();
+            start_success();
             return;
         }
         entered.clear();
@@ -306,7 +317,7 @@ auto Window::press_cell(const int index) -> void {
 }
 
 auto Window::handle_press() -> void {
-    if(focused == nullptr) {
+    if(success || focused == nullptr) {
         return;
     }
     press_cell(focused->hit_test(pointer_x, pointer_y));
@@ -338,7 +349,7 @@ auto Window::on_wl_keyboard_keymap(const uint32_t /*format*/, const int32_t fd, 
 }
 
 auto Window::on_wl_keyboard_key(const uint32_t key, const uint32_t state) -> void {
-    if(state != WL_KEYBOARD_KEY_STATE_PRESSED) {
+    if(success || state != WL_KEYBOARD_KEY_STATE_PRESSED) {
         return;
     }
     if(const auto digit = key_digit(key)) {
@@ -429,13 +440,30 @@ auto Window::get_anim_fd() -> int {
 
 auto Window::on_anim_tick() -> void {
     const auto expirations = anim_timer.read<uint64_t>().value_or(1);
-    flash_phase -= theme::flash_decay * double(expirations);
-    if(flash_phase <= 0.0) {
-        flash_phase = 0.0;
-        flash_cell  = -1;
+
+    // fade out the button press flash
+    if(flash_cell != -1) {
+        flash_phase -= theme::flash_decay * double(expirations);
+        if(flash_phase <= 0.0) {
+            flash_phase = 0.0;
+            flash_cell  = -1;
+        }
+        redraw();
+    }
+
+    if(success) {
+        // hold the green dots for a moment, then unlock
+        success_phase += theme::success_step * double(expirations);
+        if(success_phase >= 1.0) {
+            arm_anim_timer(false);
+            unlock();
+        }
+        return;
+    }
+
+    if(flash_cell == -1) {
         arm_anim_timer(false);
     }
-    redraw();
 }
 
 auto Window::flush() -> void {

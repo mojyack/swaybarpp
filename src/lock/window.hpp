@@ -97,12 +97,17 @@ class Window : towl::OutputCallbacks,
     int            flash_cell  = -1;
     double         flash_phase = 0.0;
 
+    // success animation: the dots glow green (phase 0.0 -> 1.0) before unlocking
+    bool   success       = false;
+    double success_phase = 0.0;
+
     auto add_surface(wl_output* output) -> void;
     auto surface_for(wl_surface* surface) -> LockSurface*;
     auto prune() -> void;
 
     auto arm_anim_timer(bool on) -> void;
     auto start_flash(int index) -> void;
+    auto start_success() -> void;
     auto press_digit(char digit) -> void;
     auto press_backspace() -> void;
     auto press_cell(int index) -> void;
