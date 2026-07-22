@@ -102,9 +102,11 @@ auto main(const int argc, const char* const* const argv) -> int {
         event.data.fd = fd;
         dynamic_assert(epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event) == 0);
     };
-    const auto wlfd = window.get_fd();
+    const auto wlfd   = window.get_fd();
+    const auto animfd = window.get_anim_fd();
     add_fd(wlfd);
     add_fd(timer.as_handle());
+    add_fd(animfd);
 
     auto events = std::array<epoll_event, 8>();
     while(window.running) {
@@ -127,6 +129,8 @@ auto main(const int argc, const char* const* const argv) -> int {
                 read(timer.as_handle(), &expirations, sizeof(expirations));
                 spawn_command(*lock_config.suspend_command);
                 reset_timer();
+            } else if(fd == animfd) {
+                window.on_anim_tick();
             }
         }
     }

@@ -6,6 +6,7 @@
 
 #include "../cairo-util.hpp"
 #include "../shm-buffer.hpp"
+#include "../util/fd.hpp"
 #include "../towl/compositor.hpp"
 #include "../towl/display.hpp"
 #include "../towl/output.hpp"
@@ -83,10 +84,17 @@ class Window : towl::OutputCallbacks,
     std::string entered;
     bool        error = false;
 
+    // press-flash animation: the pressed cell lights up (phase 1.0) and fades to 0
+    FileDescriptor anim_timer;
+    int            flash_cell  = -1;
+    double         flash_phase = 0.0;
+
     auto add_surface(wl_output* output) -> void;
     auto surface_for(wl_surface* surface) -> LockSurface*;
     auto prune() -> void;
 
+    auto arm_anim_timer(bool on) -> void;
+    auto start_flash(int index) -> void;
     auto press_digit(char digit) -> void;
     auto press_backspace() -> void;
     auto press_cell(int index) -> void;
@@ -115,6 +123,8 @@ class Window : towl::OutputCallbacks,
     std::function<void()>                 on_activity;
 
     auto get_fd() -> int;
+    auto get_anim_fd() -> int;
+    auto on_anim_tick() -> void;
     auto flush() -> void;
     auto dispatch() -> bool;
     auto roundtrip() -> void;

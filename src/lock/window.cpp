@@ -3,6 +3,7 @@
 #include <numbers>
 
 #include <linux/input-event-codes.h>
+#include <sys/timerfd.h>
 #include <unistd.h>
 
 #include "../macros/assert.hpp"
@@ -18,6 +19,8 @@ constexpr auto dot_r     = 6.0;
 constexpr auto dot_pitch = 28.0;
 
 constexpr auto button_alpha = 0.12;
+constexpr auto flash_alpha  = 0.35; // extra fill added to a freshly-pressed button
+constexpr auto flash_decay  = 0.12; // fade-out per 16ms animation tick
 constexpr auto error_color  = Color{0xbf / 255.0, 0x61 / 255.0, 0x6a / 255.0};
 } // namespace theme
 
@@ -32,6 +35,13 @@ auto cell_digit(const int index) -> char {
         return '0';
     }
     return 0;
+}
+
+auto digit_cell(const char digit) -> int {
+    if(digit == '0') {
+        return 10;
+    }
+    return digit - '1';
 }
 
 auto key_digit(const uint32_t key) -> char {
@@ -188,14 +198,20 @@ auto LockSurface::redraw() -> void {
             continue;
         }
         const auto [cx, cy] = cell_center(i);
+        const auto flash    = i == app.flash_cell ? app.flash_phase : 0.0;
         if(i == backspace_cell) {
+            if(flash > 0.0) {
+                cairo_arc(cairo, cx, cy, theme::button_r, 0, 2 * std::numbers::pi);
+                cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, flash * theme::flash_alpha);
+                cairo_fill(cairo);
+            }
             if(!app.entered.empty()) {
                 draw_text(cairo, app.font, "⌫", cx, cy, app.foreground);
             }
             continue;
         }
         cairo_arc(cairo, cx, cy, theme::button_r, 0, 2 * std::numbers::pi);
-        cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, theme::button_alpha);
+        cairo_set_source_rgba(cairo, app.foreground.r, app.foreground.g, app.foreground.b, theme::button_alpha + flash * theme::flash_alpha);
         cairo_fill(cairo);
         const auto label = std::array{cell_digit(i), '\0'};
         draw_text(cairo, app.digit_font, label.data(), cx, cy, app.foreground);
@@ -233,6 +249,22 @@ auto Window::prune() -> void {
     std::erase_if(surfaces, [](const auto& s) { return s->closed; });
 }
 
+auto Window::arm_anim_timer(const bool on) -> void {
+    const auto tick = on ? 16'000'000L : 0L; // ~60fps
+    const auto its  = itimerspec{
+         .it_interval = {.tv_sec = 0, .tv_nsec = tick},
+         .it_value    = {.tv_sec = 0, .tv_nsec = tick},
+    };
+    timerfd_settime(anim_timer.as_handle(), 0, &its, nullptr);
+}
+
+auto Window::start_flash(const int index) -> void {
+    flash_cell  = index;
+    flash_phase = 1.0;
+    arm_anim_timer(true);
+    // the caller's press_* redraws with the fresh highlight
+}
+
 auto Window::press_digit(const char digit) -> void {
     error = false;
     if(entered.size() < pin_len) {
@@ -265,8 +297,12 @@ auto Window::press_backspace() -> void {
 
 auto Window::press_cell(const int index) -> void {
     if(const auto digit = cell_digit(index)) {
+        start_flash(index);
         press_digit(digit);
     } else if(index == backspace_cell) {
+        if(!entered.empty()) {
+            start_flash(index);
+        }
         press_backspace();
     } else if(on_activity) {
         on_activity();
@@ -310,8 +346,12 @@ auto Window::on_wl_keyboard_key(const uint32_t key, const uint32_t state) -> voi
         return;
     }
     if(const auto digit = key_digit(key)) {
+        start_flash(digit_cell(digit));
         press_digit(digit);
     } else if(key == KEY_BACKSPACE) {
+        if(!entered.empty()) {
+            start_flash(backspace_cell);
+        }
         press_backspace();
     } else if(key == KEY_ESC) {
         error = false;
@@ -387,6 +427,21 @@ auto Window::get_fd() -> int {
     return display.get_fd();
 }
 
+auto Window::get_anim_fd() -> int {
+    return anim_timer.as_handle();
+}
+
+auto Window::on_anim_tick() -> void {
+    const auto expirations = anim_timer.read<uint64_t>().value_or(1);
+    flash_phase -= theme::flash_decay * double(expirations);
+    if(flash_phase <= 0.0) {
+        flash_phase = 0.0;
+        flash_cell  = -1;
+        arm_anim_timer(false);
+    }
+    redraw();
+}
+
 auto Window::flush() -> void {
     display.flush();
 }
@@ -425,6 +480,8 @@ Window::Window(const Color background, const Color foreground, PangoFontDescript
 
     digit_font = pango_font_description_copy(font);
     pango_font_description_set_size(digit_font, 26 * PANGO_SCALE);
+
+    anim_timer = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
 
     lock = lock_manager->lock();
     lock.init(this);
